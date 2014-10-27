@@ -21,9 +21,9 @@ public class HTTPHandler {
         client = new DefaultHttpClient();
     }
 
-    public void get() {
+    public void get(String requestStr) {
         try {
-            HttpGet request = new HttpGet("http://graph.facebook.com/1509447019293978?fields=id,name");
+            HttpGet request = new HttpGet(requestStr);
             HttpResponse response = client.execute(request);
 
             BufferedReader rd = new BufferedReader (new InputStreamReader(response.getEntity().getContent()));
