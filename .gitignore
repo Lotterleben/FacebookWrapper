@@ -1,3 +1,6 @@
+## ignore properties file containing appID, appSecret and oauthAccessToken
+properties.txt
+
 ## Java
 
 *.class
