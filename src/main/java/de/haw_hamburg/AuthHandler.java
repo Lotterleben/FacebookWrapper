@@ -14,15 +14,18 @@ import java.util.Properties;
  */
 public class AuthHandler {
 
-    private  PropertyHandler propertyHandler;
+    private PropertyHandler propertyHandler;
+    private RequestHandler requestHandler;
     private String appID;
     private String appSecret;
     private String oauthAccessToken;
-    private static String userAccessToken;
+    private String userAccessCode;
+    private String redirectUri;
     private int myPort = 8200;
 
     public AuthHandler() {
         propertyHandler = PropertyHandler.getInstance();
+        requestHandler = RequestHandler.getInstance();
 
         appID = propertyHandler.getProperty("appID");
         appSecret = propertyHandler.getProperty("appSecret");
@@ -43,20 +46,32 @@ public class AuthHandler {
 
     public void login() {
         startServer();
-        String redirectUri = String.format("http://localhost:%d/test", myPort);
+        redirectUri = String.format("http://localhost:%d/test", myPort);
         String requestStr = String.format("https://www.facebook.com/dialog/oauth?client_id=%s&redirect_uri=%s", appID, redirectUri);
-        System.out.println("Please copy & paste the following into your browser and grant the app access");
+        System.out.println("Please copy & paste the following into your browser and grant the app access:\n");
         System.out.println(requestStr);
     }
 
     class ResponseHandler implements HttpHandler {
         public void handle(HttpExchange he) throws IOException {
-            userAccessToken = he.getRequestURI().getQuery();
+            System.out.println(he.getResponseBody());
+            userAccessCode = he.getRequestURI().getQuery().split("=")[1];//  .getQuery();
 
-            System.out.println("I can haz new access token:");
-            System.out.println(userAccessToken);
+            System.out.println("I can haz new access code:");
+            System.out.println(userAccessCode);
 
-            propertyHandler.setProperty("userAccessToken", userAccessToken);
+            // exchange code for access token
+            String exchangeStr = String.format("https://graph.facebook.com/oauth/access_token?"+
+                                               "client_id=%s"+
+                                               "&redirect_uri=%s"+
+                                               "&client_secret=%s"+
+                                               "&code=%s", appID, redirectUri, appSecret, userAccessCode );
+            System.out.println(exchangeStr);
+            String response = requestHandler.get(exchangeStr);
+            System.out.println(response);
+
+            // TODO error handling
+            propertyHandler.setProperty("userAccessToken", response.split("=")[1]);
         }
     }
 }

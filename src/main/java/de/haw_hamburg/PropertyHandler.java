@@ -8,6 +8,8 @@ import java.util.Properties;
  */
 public class PropertyHandler {
 
+    /* TODO: make sure old values are overwritten */
+
     private static PropertyHandler instance;
     private Properties props;
     private Writer writer;
@@ -45,6 +47,7 @@ public class PropertyHandler {
         }
     }
 
+    // TODO: fail if propoerty is not available
     public void setProperty(String key, String property) {
         props.setProperty(key, property);
         try {
